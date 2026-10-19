@@ -1,0 +1,5 @@
+# Keep non-interactive shells quiet and independent of optional toolchains.
+typeset -U path
+path=("$HOME/.local/bin" $path)
+[[ -f "$HOME/.zshenv.local" ]] && source "$HOME/.zshenv.local"
+return 0

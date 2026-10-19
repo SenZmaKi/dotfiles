@@ -1,0 +1,135 @@
+{
+  "modules": {
+    "shell": {
+      "packages": [
+        "zsh",
+        "oh-my-posh",
+        "zoxide",
+        "fzf",
+        "bat",
+        "lf",
+        "fastfetch"
+      ],
+      "commands": [
+        "zsh",
+        "oh-my-posh",
+        "zoxide",
+        "fzf",
+        "bat",
+        "lf",
+        "fastfetch"
+      ],
+      "roots": [
+        ".zshrc",
+        ".zprofile",
+        ".config/oh-my-posh",
+        ".zshenv"
+      ]
+    },
+    "tmux": {
+      "dependencies": [
+        "shell"
+      ],
+      "packages": [
+        "tmux"
+      ],
+      "commands": [
+        "tmux"
+      ],
+      "roots": [
+        ".config/tmux/tmux.conf",
+        ".config/tmux/tmux.conf.local",
+        ".config/tmux/session-zoxide.zsh"
+      ]
+    },
+    "nvim": {
+      "packages": [
+        "neovim",
+        "ripgrep",
+        "fd",
+        "tree-sitter-cli",
+        "node",
+        "yarn"
+      ],
+      "commands": [
+        "nvim",
+        "rg",
+        "fd",
+        "tree-sitter",
+        "node",
+        "yarn",
+        "cc"
+      ],
+      "roots": [
+        ".config/nvim"
+      ]
+    },
+    "git": {
+      "packages": [
+        "git",
+        "gh",
+        "git-delta"
+      ],
+      "commands": [
+        "git",
+        "gh",
+        "delta"
+      ],
+      "roots": [
+        ".gitconfig",
+        ".config/git/ignore",
+        ".config/gh/config.yml"
+      ]
+    },
+    "monitoring": {
+      "packages": [
+        "btop"
+      ],
+      "commands": [
+        "btop"
+      ],
+      "roots": [
+        ".config/btop/btop.conf"
+      ]
+    },
+    "kitty": {
+      "casks": [
+        "kitty",
+        "font-fira-code-nerd-font"
+      ],
+      "commands": [],
+      "roots": [
+        ".config/kitty/kitty.conf"
+      ]
+    },
+    "macos": {
+      "os": "Darwin",
+      "casks": [
+        "karabiner-elements",
+        "raycast"
+      ],
+      "commands": [],
+      "roots": [
+        ".config/karabiner/karabiner.json"
+      ]
+    }
+  },
+  "profiles": {
+    "terminal": [
+      "shell",
+      "tmux",
+      "nvim",
+      "git",
+      "monitoring"
+    ],
+    "workstation": [
+      "shell",
+      "tmux",
+      "nvim",
+      "git",
+      "monitoring",
+      "kitty",
+      "macos"
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "module": "shell",
+    "path": ".oh-my-zsh",
+    "url": "https://github.com/ohmyzsh/ohmyzsh.git",
+    "commit": "106f9874a22ec8cfa1e69ae8e1143d8720f087dc"
+  },
+  {
+    "module": "shell",
+    "path": ".oh-my-zsh/custom/plugins/zsh-autosuggestions",
+    "url": "https://github.com/zsh-users/zsh-autosuggestions",
+    "commit": "85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5"
+  },
+  {
+    "module": "shell",
+    "path": ".oh-my-zsh/custom/plugins/fast-syntax-highlighting",
+    "url": "https://github.com/zdharma-continuum/fast-syntax-highlighting.git",
+    "commit": "3d574ccf48804b10dca52625df13da5edae7f553"
+  },
+  {
+    "module": "shell",
+    "path": ".oh-my-zsh/custom/plugins/zsh-autocomplete",
+    "url": "https://github.com/marlonrichert/zsh-autocomplete.git",
+    "commit": "316c588a92e3444e919ca9a341fc8894c82800a2"
+  },
+  {
+    "module": "shell",
+    "path": ".oh-my-zsh/custom/plugins/zsh-uv-env",
+    "url": "https://github.com/matthiasha/zsh-uv-env",
+    "commit": "c073736b08a68491a5fa0deee056bbe6710bcdc7"
+  },
+  {
+    "module": "tmux",
+    "path": ".config/tmux/plugins/tpm",
+    "url": "https://github.com/tmux-plugins/tpm.git",
+    "commit": "e261deb1b47614eed3400089ce7197dc68acc4eb"
+  },
+  {
+    "module": "tmux",
+    "path": ".config/tmux/plugins/.tmux",
+    "url": "https://github.com/gpakosz/.tmux.git",
+    "commit": "87dcd13a28aeb5f18baee630e24b3f5765ae3a4f"
+  }
+]

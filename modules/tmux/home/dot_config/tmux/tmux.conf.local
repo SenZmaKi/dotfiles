@@ -1,0 +1,124 @@
+# Unbind the default prefix
+unbind C-b
+
+# Bind the new prefix to the 'send-prefix' command to allow sending the
+# prefix key itself to the shell if needed (by pressing the combo twice)
+bind M-o send-prefix
+
+# Reload config binding
+unbind r
+bind r source-file ~/.config/tmux/tmux.conf
+
+# Fix Neovim cursor moving on window switches
+set -ga terminal-overrides ',*:Ss=\E[%p1%d q:Se=\E[2 q'
+
+# Send focus events to programs
+set -g focus-events on
+# Start session numbering at 1
+set -g base-index 1
+# Start window numbering at 1
+set -g base-index 1
+setw -g pane-base-index 1
+
+# Renumber windows when one is closed
+set -g renumber-windows on
+# Ensure tmux switches to another session instead of exiting
+set -g detach-on-destroy off
+
+# Enable mouse
+set -g mouse on
+
+# Set the new prefix to Alt/Option+o
+set-option -g prefix M-o
+
+# Session management
+# Open session picker ui
+bind C-f choose-session
+# Switch to the next session
+bind Tab switch-client -n
+# Switch to the previous session
+bind BTab switch-client -p
+# Create a new session
+bind C-c command-prompt -p "New Session Name:" "new-session -s '%%'"
+bind C-r command-prompt -I "#S" "rename-session '%%'"
+bind C-q kill-session
+
+# Pane management
+# Navigate between panes like in vim binding
+bind h select-pane -L
+bind l select-pane -R
+bind k select-pane -U
+bind j select-pane -D
+# Make panes like in vim binding
+bind s split-window -h # Split panes horizontal
+bind v split-window -v # Split panes vertically
+bind q kill-pane # Close pane
+
+# Window management
+bind -n M-l next-window
+bind -n M-h previous-window
+# Open new window from current window's path
+bind u new-window  -c "#{pane_current_path}"
+bind c new-window
+
+# Jump new shell windows to the project matching the session name.
+set-hook -g after-new-window 'if-shell -F "#{&&:#{!=:#{session_name},main},#{==:#{pane_start_command},}}" { run-shell "zsh ~/.config/tmux/session-zoxide.zsh #{q:session_name} #{pane_id} #{q:socket_path}" }'
+set-hook -g after-new-session 'if-shell -F "#{&&:#{!=:#{session_name},main},#{==:#{pane_start_command},}}" { run-shell "zsh ~/.config/tmux/session-zoxide.zsh #{q:session_name} #{pane_id} #{q:socket_path}" }'
+# Move windows
+bind -n M-S-Left swap-window -t -1\; select-window -t -1
+bind -n M-S-Right swap-window -t +1\; select-window -t +1
+# Unbind default switch to window
+unbind 0
+unbind 1
+unbind 2
+unbind 3
+unbind 4
+unbind 5
+unbind 6
+unbind 7
+unbind 8
+unbind 9
+# Switch to window
+bind -n M-1 select-window -t 1
+bind -n M-2 select-window -t 2
+bind -n M-3 select-window -t 3
+bind -n M-4 select-window -t 4
+bind -n M-5 select-window -t 5
+bind -n M-6 select-window -t 6
+bind -n M-7 select-window -t 7
+bind -n M-8 select-window -t 8
+bind -n M-9 select-window -t 9
+bind -n M-0 select-window -t 0
+
+# Plugins
+# Install plugins shortcut: Leader, I
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'gpakosz/.tmux'
+# set -g @plugin 'tmux-plugins/tmux-sensible'
+# set -g @plugin 'tmux-plugins/tmux-yank'
+#
+# # Theme
+# set -g @plugin 'catppuccin/tmux'
+#
+# # Catpuccin config
+# set -g @catppuccin_window_left_separator ""
+# set -g @catppuccin_window_right_separator " "
+# set -g @catppuccin_window_middle_separator " █"
+# set -g @catppuccin_window_number_position "right"
+#
+# set -g @catppuccin_window_default_fill "number"
+# set -g @catppuccin_window_default_text "#W"
+#
+# set -g @catppuccin_window_current_fill "number"
+# set -g @catppuccin_window_current_text "#W"
+#
+# set -g @catppuccin_status_modules_right "directory user host session"
+# set -g @catppuccin_status_left_separator  " "
+# set -g @catppuccin_status_right_separator ""
+# set -g @catppuccin_status_fill "icon"
+# set -g @catppuccin_status_connect_separator "no"
+#
+# set -g @catppuccin_directory_text "#{pane_current_path}"
+#
+# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+run '~/.config/tmux/plugins/tpm/tpm'

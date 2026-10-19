@@ -1,0 +1,24 @@
+[core]
+    pager = delta
+    excludesfile = ~/.config/git/ignore
+[interactive]
+    diffFilter = delta --color-only
+[push]
+    autoSetupRemote = true
+[delta]
+    navigate = true
+    side-by-side = true
+    line-numbers = true
+    syntax-theme = gruvbox-dark
+[merge]
+    conflictStyle = zdiff3
+[pull]
+    ff = only
+[credential "https://github.com"]
+    helper =
+    helper = !gh auth git-credential
+[credential "https://gist.github.com"]
+    helper =
+    helper = !gh auth git-credential
+[include]
+    path = ~/.gitconfig.local

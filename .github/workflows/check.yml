@@ -1,0 +1,32 @@
+name: Dotfiles checks
+on: [push, pull_request]
+jobs:
+  check:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test prerequisites
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            sudo apt-get update
+            sudo apt-get install -y zsh shellcheck
+            sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+            echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          else
+            brew install chezmoi shellcheck
+          fi
+      - name: Check scripts
+        run: |
+          shellcheck setup bootstrap.sh
+          zsh -n modules/shell/home/dot_zshrc
+          zsh -n modules/shell/home/dot_zprofile
+          zsh -n modules/shell/home/dot_zshenv
+          zsh -n modules/tmux/home/dot_config/tmux/session-zoxide.zsh
+      - name: Exercise real configuration application and recovery
+        run: python3 -m unittest discover -s tests -v
