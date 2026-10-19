@@ -1,0 +1,9 @@
+[run]
+branch = True
+source = .
+parallel = True
+patch = subprocess,execv
+
+[report]
+show_missing = True
+include = setup.py

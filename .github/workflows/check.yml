@@ -1,11 +1,29 @@
 name: Dotfiles checks
-on: [push, pull_request]
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dotfiles-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
+    name: Test (${{ matrix.os }})
+    timeout-minutes: 15
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -15,12 +33,13 @@ jobs:
         run: |
           if [ "$RUNNER_OS" = Linux ]; then
             sudo apt-get update
-            sudo apt-get install -y zsh shellcheck
+            sudo apt-get install -y zsh tmux git shellcheck
             sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
             echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           else
-            brew install chezmoi shellcheck
+            brew install chezmoi shellcheck tmux
           fi
+          python -m pip install 'coverage>=7.10,<8'
       - name: Check scripts
         run: |
           shellcheck setup bootstrap.sh
@@ -28,5 +47,24 @@ jobs:
           zsh -n modules/shell/home/dot_zprofile
           zsh -n modules/shell/home/dot_zshenv
           zsh -n modules/tmux/home/dot_config/tmux/session-zoxide.zsh
-      - name: Exercise real configuration application and recovery
-        run: python3 -m unittest discover -s tests -v
+          python -m compileall -q setup.py tests
+      - name: Run regression suite
+        id: tests
+        run: |
+          python -m coverage run -m unittest discover -s tests -v 2>&1 | tee test-results.txt
+      - name: Check coverage
+        if: ${{ always() && steps.tests.outcome != 'skipped' }}
+        run: |
+          python -m coverage combine
+          python -m coverage json -o coverage.json
+          python -m coverage report --fail-under=95
+      - name: Save test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}
+          path: |
+            test-results.txt
+            coverage.json
+          if-no-files-found: ignore
+          retention-days: 14

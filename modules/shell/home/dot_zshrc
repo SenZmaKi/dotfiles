@@ -6,6 +6,8 @@ typeset -U path
 path=("$HOME/.local/bin" $path)
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME=""
+# Plugin versions are managed explicitly by plugins.lock.json.
+zstyle ":omz:update" mode disabled
 CASE_SENSITIVE=true
 DISABLE_MAGIC_FUNCTIONS=true
 ENABLE_CORRECTION=true
@@ -36,6 +38,7 @@ alias nt='open_path .'
 alias finder='open_path .'
 alias uptodo='git commit -am "Update todo" && git push'
 makekey() {
+  setopt localoptions pipefail
   if (( $+commands[openssl] )); then
     command openssl rand -base64 32 | tr '+/' '-_' | tr -d '=\n' | clipcopy
   else print -u2 'makekey requires openssl'; return 1; fi

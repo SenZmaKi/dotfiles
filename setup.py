@@ -23,7 +23,10 @@ def run(*args, **kwargs):
 
 
 def select(names, system):
+    if not isinstance(names, list) or any(not isinstance(name, str) for name in names):
+        raise ValueError('Module selection must be a list of module names')
     result = []
+    visiting = set()
     def add(name):
         if name not in MODULES:
             raise ValueError('Unknown module: ' + name)
@@ -31,8 +34,12 @@ def select(names, system):
         if module.get('os', system) != system:
             print('Skipping ' + name + ' on ' + system)
             return
+        if name in visiting:
+            raise ValueError('Module dependency cycle: ' + name)
+        visiting.add(name)
         for dependency in module.get('dependencies', []):
             add(dependency)
+        visiting.remove(name)
         if name not in result:
             result.append(name)
     for name in names:
@@ -118,18 +125,37 @@ def install_linux_font(home):
     asset = json.loads((ROOT / 'assets.lock.json').read_text())['firacode']
     dest = home / '.local/share/fonts/FiraCodeNerdFont'
     marker = dest / '.archive-sha256'
-    if marker.exists() and marker.read_text().strip() == asset['sha256']:
-        return
+    installed = dest / '.files-sha256.json'
+    if marker.exists() and marker.read_text().strip() == asset['sha256'] and installed.exists():
+        try:
+            files = json.loads(installed.read_text())
+            if files and all(Path(name).name == name and (dest / name).is_file()
+                             and hashlib.sha256((dest / name).read_bytes()).hexdigest() == digest
+                             for name, digest in files.items()):
+                return
+        except (ValueError, AttributeError):
+            pass
     with tempfile.TemporaryDirectory(prefix='dotfiles-font-') as tmp:
         archive = Path(tmp) / 'font.zip'
         run('curl', '-fsSL', '--max-time', '180', asset['url'], '-o', archive)
         if hashlib.sha256(archive.read_bytes()).hexdigest() != asset['sha256']:
             raise ValueError('FiraCode font archive checksum mismatch')
-        dest.mkdir(parents=True, exist_ok=True)
+        extracted = {}
         with zipfile.ZipFile(archive) as fonts:
             for entry in fonts.infolist():
                 if entry.filename.endswith('.ttf') or Path(entry.filename).name in ('LICENSE', 'OFL.txt'):
-                    (dest / Path(entry.filename).name).write_bytes(fonts.read(entry))
+                    name = Path(entry.filename).name
+                    if name in extracted:
+                        raise ValueError('Duplicate font archive filename: ' + name)
+                    extracted[name] = fonts.read(entry)
+        if not any(name.endswith('.ttf') for name in extracted):
+            raise ValueError('Font archive contains no fonts')
+        dest.mkdir(parents=True, exist_ok=True)
+        marker.unlink(missing_ok=True)
+        for name, content in extracted.items():
+            (dest / name).write_bytes(content)
+        installed.write_text(json.dumps({name: hashlib.sha256(content).hexdigest()
+                                         for name, content in extracted.items()}))
         marker.write_text(asset['sha256'] + '\n')
     if shutil.which('fc-cache'):
         run('fc-cache', '-f', dest)
@@ -252,7 +278,7 @@ def main():
         names = [n.strip() for n in args.modules.split(',') if n.strip()]
         if not names:
             raise ValueError('Select at least one module')
-    elif saved.exists():
+    elif saved.exists() and args.command != 'restore':
         names = json.loads(saved.read_text())
     else:
         names = MANIFEST['profiles']['terminal']
@@ -288,14 +314,25 @@ def main():
             raise ValueError('restore requires --backup DIRECTORY')
         directory = args.backup.expanduser().resolve()
         records = json.loads((directory / 'manifest.json').read_text())
-        # Validate all paths before writing and take a pre-restore snapshot.
+        # Validate the entire backup before taking a snapshot or replacing files.
+        if not isinstance(records, list):
+            raise ValueError('Backup manifest must be a list of records')
+        seen = set()
         for record in records:
+            if (not isinstance(record, dict) or not isinstance(record.get('path'), str)
+                    or type(record.get('existed')) is not bool):
+                raise ValueError('Invalid backup record: expected path and boolean existed')
+            if record['path'] in seen:
+                raise ValueError('Duplicate backup path: ' + record['path'])
+            seen.add(record['path'])
             path = Path(record['path'])
             if path.is_absolute() or '..' in path.parts or record['path'] not in targets(list(MODULES)):
                 raise ValueError('Invalid backup path: ' + record['path'])
             source = directory / 'files' / path
             if record['existed'] and not (source.exists() or source.is_symlink()):
                 raise ValueError('Missing backup file: ' + str(source))
+        if (directory / 'selection.json').exists():
+            select(json.loads((directory / 'selection.json').read_text()), system)
         restore_modules = [m for m in MODULES if any(r['path'] in MODULES[m]['roots'] for r in records)]
         backup(restore_modules, home, state)
         for record in records:
@@ -355,6 +392,6 @@ def main():
 if __name__ == '__main__':
     try:
         sys.exit(main())
-    except (ValueError, subprocess.CalledProcessError, OSError) as error:
+    except (ValueError, subprocess.CalledProcessError, OSError, zipfile.BadZipFile) as error:
         print('Error:', error, file=sys.stderr)
         sys.exit(1)

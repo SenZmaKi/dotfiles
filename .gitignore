@@ -4,3 +4,9 @@ __pycache__/
 .local/
 *.rayconfig
 .env
+
+.coverage
+.coverage.*
+htmlcov/
+coverage.json
+test-results.txt

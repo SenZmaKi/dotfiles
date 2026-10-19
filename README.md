@@ -7,9 +7,10 @@ Python's standard library coordinates selection, backups, and diagnostics.
 
 ## New machine
 
-Clone this repository (or download and extract an archive), then:
+Clone the private repository using an authenticated GitHub CLI, then:
 
 ```sh
+gh repo clone SenZmaKi/dotfiles
 cd dotfiles
 ./bootstrap.sh install --profile terminal
 # Or choose exactly what you need:
@@ -24,8 +25,8 @@ for apt prerequisites; do not run the whole setup as root. Linux bootstrap suppo
 Ubuntu/Debian. macOS supports Intel and Apple Silicon through Homebrew's prefixes.
 Homebrew's own OS/architecture requirements still apply.
 
-Your repository URL is not hardcoded: create a private Git remote and clone that
-on subsequent devices. Logins, SSH keys, application permissions, and project
+The private remote is `https://github.com/SenZmaKi/dotfiles`. Authenticate with
+`gh auth login` before cloning on subsequent devices. Logins, SSH keys, application permissions, and project
 repositories are separate. This is an environment installer, not a disk backup.
 
 ## Modules
@@ -175,3 +176,33 @@ References: [chezmoi](https://www.chezmoi.io/),
 [Homebrew Bundle](https://docs.brew.sh/Brew-Bundle-and-Brewfile).
 The saved cloud-context theme comes from
 [Oh My Posh](https://github.com/JanDeDobbeleer/oh-my-posh) (MIT).
+
+## Comprehensive regression suite
+
+The [test matrix and recorded results](docs/testing.md) describe each evidence layer.
+The suite includes real chezmoi application/recovery, all 128 module selections on
+both platforms, real local Git clones/updates, real Zsh and isolated tmux sessions.
+Package-manager commands and clipboard/desktop helpers use controlled fixtures.
+
+```sh
+python3 -m unittest discover -s tests -v
+
+# Reproduce Ubuntu 24.04 checks without changing your host:
+docker build -f tests/Dockerfile -t dotfiles-tests:local .
+docker run --rm -v "$PWD:/work:ro" dotfiles-tests:local
+
+# Optional coverage, including Python subprocesses:
+uv run --with 'coverage>=7.10' coverage erase
+uv run --with 'coverage>=7.10' coverage run -m unittest discover -s tests -v
+uv run --with 'coverage>=7.10' coverage combine
+uv run --with 'coverage>=7.10' coverage report
+
+# Optional live GitHub downloads; uses a temporary home:
+python3 tests/check_upstream.py
+```
+
+Restore validates backup record types, duplicate paths, payload existence and saved
+module selection before replacing files. A corrupt current selection does not block
+recovery. Linux font installation verifies the downloaded archive and installed file
+hashes, so deleted/corrupt fonts are repaired rather than hidden by a success marker.
+Oh My Zsh automatic updates are disabled; plugin changes remain explicit.
