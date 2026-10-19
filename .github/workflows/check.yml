@@ -42,7 +42,7 @@ jobs:
           python -m pip install 'coverage>=7.10,<8'
       - name: Check scripts
         run: |
-          shellcheck setup bootstrap.sh
+          shellcheck setup bootstrap.sh install.sh
           zsh -n modules/shell/home/dot_zshrc
           zsh -n modules/shell/home/dot_zprofile
           zsh -n modules/shell/home/dot_zshenv

@@ -79,6 +79,6 @@ and coverage JSON for 14 days, including when a test fails. The jobs have a
 failure on one platform does not cancel the other. Superseded workflow runs are
 cancelled. There are no deployment or publication steps.
 
-The private GitHub repository is `SenZmaKi/dotfiles`, configured as `origin`.
+The public GitHub repository is `SenZmaKi/dotfiles`, configured as `origin`.
 Pushing `main` triggers the workflow; local results above remain distinct from
 GitHub Actions results.

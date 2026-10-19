@@ -7,16 +7,32 @@ Python's standard library coordinates selection, backups, and diagnostics.
 
 ## New machine
 
-Clone the private repository using an authenticated GitHub CLI, then:
+Run the standalone installer from its raw GitHub URL; no GitHub login is needed:
 
 ```sh
-gh repo clone SenZmaKi/dotfiles
-cd dotfiles
-./bootstrap.sh install --profile terminal
-# Or choose exactly what you need:
-./bootstrap.sh install --modules shell,nvim,git
-# Desktop machine:
-./bootstrap.sh install --profile workstation
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/SenZmaKi/dotfiles/main/install.sh)" -- install --profile terminal
+```
+
+Choose individual modules or the full workstation profile:
+
+```sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/SenZmaKi/dotfiles/main/install.sh)" -- install --modules shell,nvim,git
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/SenZmaKi/dotfiles/main/install.sh)" -- install --profile workstation
+```
+
+The installer ensures Git is available, clones the public repository to
+`~/.local/share/dotfiles`, and runs its bootstrap with your arguments. Set
+`DOTFILES_DIR` to choose another location. Existing matching checkouts are reused
+without pulling or overwriting local changes; use `./setup update` inside the
+checkout to pull deliberately. `DOTFILES_REF` selects a branch (default `main`),
+and `DOTFILES_REPO` supports your own fork.
+
+To inspect the installer before running it:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/SenZmaKi/dotfiles/main/install.sh -o /tmp/dotfiles-install.sh
+less /tmp/dotfiles-install.sh
+sh /tmp/dotfiles-install.sh install --profile terminal
 ```
 
 Bootstrap installs prerequisites and Homebrew when needed. On macOS, finish the
@@ -25,9 +41,9 @@ for apt prerequisites; do not run the whole setup as root. Linux bootstrap suppo
 Ubuntu/Debian. macOS supports Intel and Apple Silicon through Homebrew's prefixes.
 Homebrew's own OS/architecture requirements still apply.
 
-The private remote is `https://github.com/SenZmaKi/dotfiles`. Authenticate with
-`gh auth login` before cloning on subsequent devices. Logins, SSH keys, application permissions, and project
-repositories are separate. This is an environment installer, not a disk backup.
+The public repository is [SenZmaKi/dotfiles](https://github.com/SenZmaKi/dotfiles).
+Logins, SSH keys, application permissions, and project repositories are separate.
+This is an environment installer, not a disk backup.
 
 ## Modules
 
